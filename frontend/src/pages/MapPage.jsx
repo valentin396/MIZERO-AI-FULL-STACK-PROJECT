@@ -3,6 +3,8 @@ import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
 import { Link } from 'react-router-dom';
 import api from '../services/api';
+import { useCategories } from '../services/rwanda.js';
+import { useLanguage } from '../services/language.jsx';
 import 'leaflet/dist/leaflet.css';
 
 const redIcon = new L.Icon({
@@ -21,30 +23,38 @@ const greenIcon = new L.Icon({
 });
 
 export default function MapPage() {
+  const { t } = useLanguage();
+  const categories = useCategories();
   const [items, setItems] = useState([]);
   const [filter, setFilter] = useState('ALL');
+  const [category, setCategory] = useState('');
 
   useEffect(() => {
     api.get('/rwanda/map-items').then((res) => setItems(res.data));
   }, []);
 
-  const filtered = filter === 'ALL' ? items : items.filter((i) => i.status === filter);
+  const filtered = items
+    .filter((i) => filter === 'ALL' || i.status === filter)
+    .filter((i) => !category || i.category === category);
 
   return (
     <div className="max-w-6xl mx-auto px-6 py-8">
-      <h1 className="text-2xl font-semibold mb-1">Reports Map</h1>
-      <p className="text-ink/60 mb-4">
-        Every open report, placed by real district. <span className="text-clay-dark">Red</span> pins are lost, <span className="text-hills">green</span> are found.
-      </p>
-      <div className="flex gap-2 mb-3">
+      <h1 className="text-2xl font-semibold mb-1">{t('map_title')}</h1>
+      <p className="text-ink/60 mb-4">{t('map_sub')}</p>
+      <div className="flex flex-wrap items-center gap-2 mb-3">
         {['ALL', 'LOST', 'FOUND'].map((f) => (
           <button key={f} onClick={() => setFilter(f)}
             className={`text-xs px-3 py-1.5 rounded-full font-medium transition-colors ${
               filter === f ? (f === 'LOST' ? 'bg-clay text-cream' : f === 'FOUND' ? 'bg-hills text-cream' : 'bg-ink text-cream') : 'border border-ink/20 text-ink/60 hover:border-ink/40'
             }`}>
-            {f === 'ALL' ? 'All' : f === 'LOST' ? 'Lost' : 'Found'}
+            {f === 'ALL' ? t('filter_all') : f === 'LOST' ? t('filter_lost') : t('filter_found')}
           </button>
         ))}
+        <select value={category} onChange={(e) => setCategory(e.target.value)}
+          className="text-xs border border-ink/20 rounded-full px-3 py-1.5 bg-cream text-ink/60 ml-2">
+          <option value="">{t('all_categories')}</option>
+          {categories.map((c) => <option key={c} value={c}>{c}</option>)}
+        </select>
       </div>
       <div className="h-[600px] border border-ink/15 overflow-hidden">
         <MapContainer center={[-1.9403, 29.8739]} zoom={9} style={{ height: '100%', width: '100%' }} scrollWheelZoom={false}>

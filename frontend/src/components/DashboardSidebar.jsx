@@ -1,21 +1,23 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../services/auth.jsx';
-
-const LINKS = [
-  { to: '/dashboard', label: 'Dashboard', icon: '▦' },
-  { to: '/dashboard/reports', label: 'My Reports', icon: '≡' },
-  { to: '/dashboard/matches', label: 'Matches', icon: '⤦' },
-  { to: '/dashboard/chat', label: 'Chat with AI', icon: '💬' },
-  { to: '/dashboard/notifications', label: 'Notifications', icon: '•' },
-  { to: '/community', label: 'Community', icon: '◉' },
-  { to: '/dashboard/profile', label: 'Profile', icon: '○' },
-  { to: '/dashboard/settings', label: 'Settings', icon: '⚙' },
-];
+import { useLanguage } from '../services/language.jsx';
 
 export default function DashboardSidebar({ notificationCount = 0 }) {
   const { pathname } = useLocation();
   const { logout } = useAuth();
+  const { t } = useLanguage();
   const navigate = useNavigate();
+
+  const LINKS = [
+    { to: '/dashboard', label: t('side_dashboard'), icon: '▦' },
+    { to: '/dashboard/reports', label: t('side_reports'), icon: '≡' },
+    { to: '/dashboard/matches', label: t('side_matches'), icon: '⤦' },
+    { to: '/dashboard/chat', label: t('side_chat'), icon: '💬' },
+    { to: '/dashboard/notifications', label: t('side_notifications'), icon: '•' },
+    { to: '/community', label: t('side_community'), icon: '◉' },
+    { to: '/dashboard/profile', label: t('side_profile'), icon: '○' },
+    { to: '/dashboard/settings', label: t('side_settings'), icon: '⚙' },
+  ];
 
   return (
     <aside className="w-56 flex-shrink-0 border-r border-line bg-cream min-h-[calc(100vh-65px)] py-6 flex flex-col justify-between" style={{ borderRadius: 0 }}>
@@ -46,7 +48,7 @@ export default function DashboardSidebar({ notificationCount = 0 }) {
           className="w-full text-left flex items-center gap-2 px-3 py-2 text-sm rounded-lg text-ink/70 hover:bg-paper transition-colors"
         >
           <span className="w-4 text-center">→</span>
-          Logout
+          {t('side_logout')}
         </button>
       </div>
     </aside>

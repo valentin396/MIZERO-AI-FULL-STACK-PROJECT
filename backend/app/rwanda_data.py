@@ -42,7 +42,16 @@ DISTRICTS = [
     {"name": "Rwamagana", "province": "Eastern", "lat": -1.9489, "lng": 30.4347},
 ]
 
-CATEGORIES = ["Phone", "ID Card", "Wallet", "Bag", "Keys", "Laptop", "Document", "Other"]
+CATEGORIES = [
+    # Electronics
+    "Smartphone", "Laptop", "Tablet", "Earphones", "Smartwatch",
+    # Documents
+    "National ID", "Passport", "Driving License", "Student ID", "Bank Card",
+    # Personal items
+    "Backpack", "Wallet", "Keys", "Clothes", "Jewelry",
+    # Other
+    "Other",
+]
 
 
 def district_names() -> list[str]:

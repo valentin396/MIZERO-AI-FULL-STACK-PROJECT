@@ -1,41 +1,41 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../services/api';
+import { useLanguage } from '../services/language.jsx';
 import HeroIllustration from '../components/HeroIllustration.jsx';
-
-const FEATURES = [
-  { icon: '🤖', title: 'AI Matching', desc: 'Smart AI matches items based on description, location, time, and more.' },
-  { icon: '🌍', title: 'Multilingual', desc: 'Kinyarwanda, English, and French supported.' },
-  { icon: '🔒', title: 'Secure & Private', desc: 'Your data is safe and protected.' },
-  { icon: '🇷🇼', title: 'Rwanda Focused', desc: 'Built for communities across Rwanda.' },
-];
+import RwandaPhotos from '../components/RwandaPhotos.jsx';
+import PopularAreas from '../components/PopularAreas.jsx';
 
 const STATUS_COLOR = { LOST: 'text-clay-dark', FOUND: 'text-blueinfo', RECOVERED: 'text-hills', CLOSED: 'text-ink/40' };
 
 export default function Home() {
+  const { t } = useLanguage();
   const [recent, setRecent] = useState([]);
 
   useEffect(() => {
     api.get('/items').then((res) => setRecent(res.data.slice(0, 6))).catch(() => {});
   }, []);
 
+  const FEATURES = [
+    { icon: '🤖', title: t('feat_ai_title'), desc: t('feat_ai_desc') },
+    { icon: '🌍', title: t('feat_multi_title'), desc: t('feat_multi_desc') },
+    { icon: '🔒', title: t('feat_secure_title'), desc: t('feat_secure_desc') },
+    { icon: '🇷🇼', title: t('feat_rwanda_title'), desc: t('feat_rwanda_desc') },
+  ];
+
   return (
     <div>
       <section className="max-w-6xl mx-auto px-6 pt-16 pb-14 grid md:grid-cols-2 gap-10 items-center">
         <div>
           <h1 className="text-4xl md:text-5xl font-semibold leading-[1.1] mb-4">
-            <span className="text-ink">Lost something?</span><br />
-            <span className="text-hills">Found something?</span>
+            <span className="text-ink">{t('hero_line1')}</span><br />
+            <span className="text-hills">{t('hero_line2')}</span>
           </h1>
-          <p className="text-ink/70 max-w-md mb-2 leading-relaxed">MIZERO uses AI to help you find what matters.</p>
-          <p className="text-xs uppercase tracking-wide text-ink/40 mb-8 underline">AI-Powered Lost &amp; Found Platform for Rwanda</p>
+          <p className="text-ink/70 max-w-md mb-2 leading-relaxed">{t('hero_sub')}</p>
+          <p className="text-xs uppercase tracking-wide text-ink/40 mb-8 underline">{t('hero_tag')}</p>
           <div className="flex flex-wrap gap-4">
-            <Link to="/report#lost" className="bg-ink text-cream px-6 py-3 rounded-lg font-medium text-sm tracking-wide hover:bg-ink/90 transition-colors">
-              I LOST SOMETHING
-            </Link>
-            <Link to="/report#found" className="border border-hills text-hills px-6 py-3 rounded-lg font-medium hover:bg-hills hover:text-cream transition-colors">
-              I FOUND SOMETHING
-            </Link>
+            <Link to="/report#lost" className="bg-ink text-cream px-6 py-3 rounded-lg font-medium text-sm tracking-wide hover:bg-ink/90 transition-colors">{t('hero_lost_btn')}</Link>
+            <Link to="/report#found" className="border border-hills text-hills px-6 py-3 rounded-lg font-medium hover:bg-hills hover:text-cream transition-colors">{t('hero_found_btn')}</Link>
           </div>
         </div>
         <HeroIllustration />
@@ -52,14 +52,20 @@ export default function Home() {
       </section>
 
       <div className="border-t border-line" />
+      <RwandaPhotos />
+
+      <div className="border-t border-line" />
+      <PopularAreas />
+
+      <div className="border-t border-line" />
 
       <section className="max-w-6xl mx-auto px-6 py-12">
         <div className="flex items-baseline justify-between mb-6">
-          <h2 className="text-2xl font-semibold">Recently reported</h2>
-          <Link to="/search" className="text-sm text-clay hover:underline">Browse all →</Link>
+          <h2 className="text-2xl font-semibold">{t('recent_reports_title')}</h2>
+          <Link to="/search" className="text-sm text-clay hover:underline">{t('browse_all')}</Link>
         </div>
         {recent.length === 0 ? (
-          <p className="text-ink/60">Nothing reported yet — be the first.</p>
+          <p className="text-ink/60">{t('nothing_reported')}</p>
         ) : (
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {recent.map((item) => (

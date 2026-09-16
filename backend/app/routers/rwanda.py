@@ -18,6 +18,23 @@ def get_categories():
     return CATEGORIES
 
 
+@router.get("/popular-areas")
+def popular_areas(db: Session = Depends(get_db)):
+    """Real counts of reports per district — not invented numbers.
+    Only returns districts that actually have at least one report."""
+    from sqlalchemy import func
+
+    rows = (
+        db.query(Item.location, func.count(Item.id).label("n"))
+        .filter(Item.location.isnot(None))
+        .group_by(Item.location)
+        .order_by(func.count(Item.id).desc())
+        .limit(6)
+        .all()
+    )
+    return [{"location": loc, "count": n} for loc, n in rows]
+
+
 @router.get("/map-items")
 def map_items(db: Session = Depends(get_db)):
     """Every open report placed at its district's coordinates, with a

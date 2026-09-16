@@ -2,11 +2,13 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../services/api';
 import { useAuth } from '../services/auth.jsx';
+import { useLanguage } from '../services/language.jsx';
 
 const STATUS_COLOR = { LOST: 'text-clay-dark bg-clay/10', FOUND: 'text-blueinfo bg-blueinfo/10', RECOVERED: 'text-hills bg-hills/10', CLOSED: 'text-ink/40 bg-ink/5' };
 
 export default function DashboardHome() {
   const { user } = useAuth();
+  const { t } = useLanguage();
   const [data, setData] = useState(null);
 
   useEffect(() => {
@@ -17,22 +19,29 @@ export default function DashboardHome() {
 
   return (
     <div className="px-8 py-8 max-w-4xl">
-      <h1 className="text-2xl font-semibold mb-1">Welcome back, {user?.name}! 👋</h1>
-      <p className="text-ink/60 mb-8">Here's what's happening with your reports.</p>
+      <h1 className="text-2xl font-semibold mb-1">{t('welcome_back')}, {user?.name}! 👋</h1>
+      <p className="text-ink/60 mb-8">{t('dash_sub')}</p>
 
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-10">
-        <StatCard value={data.lost_count} label="Lost Items" color="text-clay-dark" />
-        <StatCard value={data.found_count} label="Found Items" color="text-blueinfo" />
-        <StatCard value={data.match_count} label="Matches" color="text-hills" />
-        <StatCard value={data.notification_count} label="Notifications" color="text-ochre" />
+      <div className="grid grid-cols-2 sm:grid-cols-5 gap-4 mb-4">
+        <StatCard value={data.lost_count} label={t('stat_lost')} color="text-clay-dark" />
+        <StatCard value={data.found_count} label={t('stat_found')} color="text-blueinfo" />
+        <StatCard value={data.match_count} label={t('stat_matches')} color="text-hills" />
+        <StatCard value={data.recovered_count} label={t('stat_recovered')} color="text-hills" />
+        <StatCard value={data.notification_count} label={t('stat_notifications')} color="text-ochre" />
       </div>
+
+      {data.total_reported > 0 && (
+        <p className="text-sm text-ink/50 mb-8">
+          {data.total_reported} · {data.recovered_count} {t('stat_recovered').toLowerCase()}
+        </p>
+      )}
 
       <div className="flex items-baseline justify-between mb-4">
-        <h2 className="text-lg font-semibold">Recent Reports</h2>
-        <Link to="/dashboard/reports" className="text-sm text-clay hover:underline">View all</Link>
+        <h2 className="text-lg font-semibold">{t('side_reports')}</h2>
+        <Link to="/dashboard/reports" className="text-sm text-clay hover:underline">{t('view_all')}</Link>
       </div>
       {data.recent_reports.length === 0 ? (
-        <p className="text-sm text-ink/50 mb-10">You haven't reported anything yet.</p>
+        <p className="text-sm text-ink/50 mb-10">{t('no_reports_yet')}</p>
       ) : (
         <div className="space-y-3 mb-10">
           {data.recent_reports.map((item) => (
@@ -51,11 +60,11 @@ export default function DashboardHome() {
       )}
 
       <div className="flex items-baseline justify-between mb-4">
-        <h2 className="text-lg font-semibold">Recent Matches</h2>
-        <Link to="/dashboard/matches" className="text-sm text-clay hover:underline">View all</Link>
+        <h2 className="text-lg font-semibold">{t('recent_matches_title')}</h2>
+        <Link to="/dashboard/matches" className="text-sm text-clay hover:underline">{t('view_all')}</Link>
       </div>
       {data.recent_matches.length === 0 ? (
-        <p className="text-sm text-ink/50">No matches yet.</p>
+        <p className="text-sm text-ink/50">{t('no_matches_yet')}</p>
       ) : (
         <div className="space-y-3">
           {data.recent_matches.map((m) => (

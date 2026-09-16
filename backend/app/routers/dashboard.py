@@ -12,6 +12,8 @@ router = APIRouter(prefix="/api/dashboard", tags=["dashboard"])
 def dashboard(db: Session = Depends(get_db), user: User = Depends(get_current_user)):
     lost_count = db.query(Item).filter(Item.user_id == user.id, Item.status == "LOST").count()
     found_count = db.query(Item).filter(Item.user_id == user.id, Item.status == "FOUND").count()
+    recovered_count = db.query(Item).filter(Item.user_id == user.id, Item.status == "RECOVERED").count()
+    total_reported = db.query(Item).filter(Item.user_id == user.id).count()
 
     my_item_ids = [i.id for i in db.query(Item.id).filter(Item.user_id == user.id).all()]
     match_count = db.query(Match).filter(
@@ -39,6 +41,8 @@ def dashboard(db: Session = Depends(get_db), user: User = Depends(get_current_us
         "lost_count": lost_count,
         "found_count": found_count,
         "match_count": match_count,
+        "recovered_count": recovered_count,
+        "total_reported": total_reported,
         "notification_count": notif_count,
         "recent_reports": recent_reports,
         "recent_matches": recent_matches,

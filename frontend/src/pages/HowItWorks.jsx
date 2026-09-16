@@ -1,3 +1,5 @@
+import { useLanguage } from '../services/language.jsx';
+
 const STEPS = [
   { title: '1. Report in under two minutes', desc: 'Answer a short chat or fill a form — real Rwandan districts, not free typing.' },
   { title: '2. MIZERO checks it against everything on file', desc: 'Five independent signals: text, category, district, date, and visual similarity.' },
@@ -6,10 +8,11 @@ const STEPS = [
 ];
 
 export default function HowItWorks() {
+  const { t } = useLanguage();
   return (
     <div className="max-w-3xl mx-auto px-6 py-14">
-      <h1 className="text-3xl font-semibold mb-2">How it works</h1>
-      <p className="text-ink/60 mb-10">From reporting to reunited, in four steps.</p>
+      <h1 className="text-3xl font-semibold mb-2">{t('howitworks_title')}</h1>
+      <p className="text-ink/60 mb-10">{t('howitworks_sub')}</p>
       <div className="space-y-6">
         {STEPS.map((s) => (
           <div key={s.title} className="border border-ink/15 bg-cream p-5">

@@ -2,8 +2,10 @@ import { useEffect, useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../services/api';
 import { useCategories } from '../services/rwanda.js';
+import { useLanguage } from '../services/language.jsx';
 
 export default function SearchPage() {
+  const { t } = useLanguage();
   const categories = useCategories();
   const [q, setQ] = useState('');
   const [status, setStatus] = useState('');
@@ -21,29 +23,29 @@ export default function SearchPage() {
   }, [q, status, category]);
 
   useEffect(() => {
-    const t = setTimeout(fetchItems, 300);
-    return () => clearTimeout(t);
+    const timer = setTimeout(fetchItems, 300);
+    return () => clearTimeout(timer);
   }, [fetchItems]);
 
   return (
     <div className="max-w-5xl mx-auto px-6 py-12">
-      <h1 className="text-3xl font-semibold mb-6">Browse reports</h1>
+      <h1 className="text-3xl font-semibold mb-6">{t('search_title')}</h1>
       <div className="flex flex-wrap gap-3 mb-8">
-        <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search by keyword, brand, landmark…"
+        <input value={q} onChange={(e) => setQ(e.target.value)} placeholder={t('search_placeholder')}
           className="flex-1 min-w-[220px] border border-ink/20 px-4 py-2 text-sm bg-cream focus:outline-none focus:border-clay" />
         <select value={status} onChange={(e) => setStatus(e.target.value)} className="border border-ink/20 px-3 py-2 text-sm bg-cream">
-          <option value="">All statuses</option>
-          <option value="LOST">Lost</option>
-          <option value="FOUND">Found</option>
-          <option value="RECOVERED">Recovered</option>
+          <option value="">{t('all_statuses')}</option>
+          <option value="LOST">{t('filter_lost')}</option>
+          <option value="FOUND">{t('filter_found')}</option>
+          <option value="RECOVERED">{t('stat_recovered')}</option>
         </select>
         <select value={category} onChange={(e) => setCategory(e.target.value)} className="border border-ink/20 px-3 py-2 text-sm bg-cream">
-          <option value="">All categories</option>
+          <option value="">{t('all_categories')}</option>
           {categories.map((c) => <option key={c} value={c}>{c}</option>)}
         </select>
       </div>
-      {loading ? <p className="text-ink/50 text-sm">Searching…</p> : items.length === 0 ? (
-        <p className="text-ink/50 text-sm">No reports match those filters.</p>
+      {loading ? <p className="text-ink/50 text-sm">…</p> : items.length === 0 ? (
+        <p className="text-ink/50 text-sm">{t('no_results')}</p>
       ) : (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {items.map((item) => (
