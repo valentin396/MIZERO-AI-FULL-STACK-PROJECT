@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import api from '../services/api';
+import { CATEGORY_EMOJI } from '../components/ItemCard.jsx';
 
 export default function ItemDetail() {
   const { id } = useParams();
@@ -17,7 +18,15 @@ export default function ItemDetail() {
     <div className="max-w-3xl mx-auto px-6 py-12">
       <p className="text-xs uppercase tracking-wide text-hills font-medium mb-2">{item.status}</p>
       <h1 className="text-3xl font-semibold mb-4">{item.title}</h1>
-      {item.image_url && <div className="w-full h-72 mb-6 border border-ink/15 bg-paper overflow-hidden"><img src={item.image_url} alt="" className="w-full h-full object-cover" /></div>}
+      <div className="w-full h-72 mb-6 border border-ink/15 bg-paper overflow-hidden">
+        {item.image_url ? (
+          <img src={item.image_url} alt="" className="w-full h-full object-cover" />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center text-6xl">
+            {CATEGORY_EMOJI[item.category] || '📦'}
+          </div>
+        )}
+      </div>
       <dl className="grid grid-cols-2 gap-4 text-sm mb-8 border border-ink/15 p-5 bg-cream">
         <div><dt className="text-ink/50">Category</dt><dd>{item.category}</dd></div>
         <div><dt className="text-ink/50">District</dt><dd>{item.location}</dd></div>

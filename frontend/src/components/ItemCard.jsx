@@ -7,7 +7,7 @@ const STATUS_STYLE = {
   CLOSED: 'bg-ink/10 text-ink/40',
 };
 
-const CATEGORY_EMOJI = {
+export const CATEGORY_EMOJI = {
   Smartphone: '📱', Laptop: '💻', Tablet: '📱', Earphones: '🎧', Smartwatch: '⌚',
   'National ID': '🪪', Passport: '🛂', 'Driving License': '🪪', 'Student ID': '🪪', 'Bank Card': '💳',
   Backpack: '🎒', Wallet: '👛', Keys: '🔑', Clothes: '👕', Jewelry: '💍',

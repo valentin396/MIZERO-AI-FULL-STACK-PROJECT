@@ -15,7 +15,43 @@ export default function DashboardHome() {
     api.get('/dashboard').then((res) => setData(res.data));
   }, []);
 
-  if (!data) return <div className="px-8 py-8 text-ink/40">Loading…</div>;
+  if (!data) {
+    return (
+      <div className="px-8 py-8 max-w-4xl animate-pulse">
+        <div className="h-7 w-64 bg-paper rounded mb-2" />
+        <div className="h-4 w-48 bg-paper rounded mb-8" />
+
+        <div className="grid grid-cols-2 sm:grid-cols-5 gap-4 mb-8">
+          {[0, 1, 2, 3, 4].map((i) => (
+            <div key={i} className="border border-ink/15 bg-cream p-4">
+              <div className="h-6 w-10 bg-paper rounded mb-2" />
+              <div className="h-3 w-16 bg-paper rounded" />
+            </div>
+          ))}
+        </div>
+
+        <div className="h-5 w-32 bg-paper rounded mb-4" />
+        <div className="space-y-3 mb-10">
+          {[0, 1, 2].map((i) => (
+            <div key={i} className="flex items-center gap-4 border border-ink/15 bg-cream p-4">
+              <div className="w-12 h-12 flex-shrink-0 bg-paper rounded-lg" />
+              <div className="flex-1 space-y-2">
+                <div className="h-4 w-2/3 bg-paper rounded" />
+                <div className="h-3 w-1/3 bg-paper rounded" />
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className="h-5 w-40 bg-paper rounded mb-4" />
+        <div className="space-y-3">
+          {[0, 1].map((i) => (
+            <div key={i} className="h-14 border border-ink/15 bg-cream p-4" />
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="px-8 py-8 max-w-4xl">

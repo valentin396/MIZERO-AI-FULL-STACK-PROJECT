@@ -25,15 +25,15 @@ const greenIcon = new L.Icon({
 export default function MapPage() {
   const { t } = useLanguage();
   const categories = useCategories();
-  const [items, setItems] = useState([]);
+  const [items, setItems] = useState(null);
   const [filter, setFilter] = useState('ALL');
   const [category, setCategory] = useState('');
 
   useEffect(() => {
-    api.get('/rwanda/map-items').then((res) => setItems(res.data));
+    api.get('/rwanda/map-items').then((res) => setItems(res.data)).catch(() => setItems([]));
   }, []);
 
-  const filtered = items
+  const filtered = (items || [])
     .filter((i) => filter === 'ALL' || i.status === filter)
     .filter((i) => !category || i.category === category);
 
@@ -56,22 +56,26 @@ export default function MapPage() {
           {categories.map((c) => <option key={c} value={c}>{c}</option>)}
         </select>
       </div>
-      <div className="h-[600px] border border-ink/15 overflow-hidden">
-        <MapContainer center={[-1.9403, 29.8739]} zoom={9} style={{ height: '100%', width: '100%' }} scrollWheelZoom={false}>
-          <TileLayer attribution='&copy; OpenStreetMap contributors' url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-          {filtered.map((item) => (
-            <Marker key={item.id} position={[item.lat, item.lng]} icon={item.status === 'LOST' ? redIcon : greenIcon}>
-              <Popup>
-                <div className="text-sm">
-                  <p className="font-medium">{item.title}</p>
-                  <p className="text-xs text-gray-500">{item.status} · {item.category} · {item.location}{item.landmark ? `, ${item.landmark}` : ''}</p>
-                  <Link to={`/items/${item.id}`} className="text-xs text-green-700 underline">View details</Link>
-                </div>
-              </Popup>
-            </Marker>
-          ))}
-        </MapContainer>
-      </div>
+      {items === null ? (
+        <div className="h-[600px] border border-ink/15 rounded-lg overflow-hidden animate-pulse bg-paper" />
+      ) : (
+        <div className="h-[600px] border border-ink/15 overflow-hidden">
+          <MapContainer center={[-1.9403, 29.8739]} zoom={9} style={{ height: '100%', width: '100%' }} scrollWheelZoom={false}>
+            <TileLayer attribution='&copy; OpenStreetMap contributors' url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+            {filtered.map((item) => (
+              <Marker key={item.id} position={[item.lat, item.lng]} icon={item.status === 'LOST' ? redIcon : greenIcon}>
+                <Popup>
+                  <div className="text-sm">
+                    <p className="font-medium">{item.title}</p>
+                    <p className="text-xs text-gray-500">{item.status} · {item.category} · {item.location}{item.landmark ? `, ${item.landmark}` : ''}</p>
+                    <Link to={`/items/${item.id}`} className="text-xs text-green-700 underline">View details</Link>
+                  </div>
+                </Popup>
+              </Marker>
+            ))}
+          </MapContainer>
+        </div>
+      )}
     </div>
   );
 }

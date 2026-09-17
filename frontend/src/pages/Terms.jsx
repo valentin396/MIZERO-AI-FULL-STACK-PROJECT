@@ -24,9 +24,15 @@ export default function Terms() {
         published on a public listing.
       </p>
       <p className="text-ink/70 leading-relaxed mb-4">
-        <strong className="text-ink">Not liable for disputes.</strong> MIZERO acts only as a
-        matching tool. Any exchange, meetup, or verification of ownership between users is their
-        own responsibility.
+        <strong className="text-ink">Not liable for disputes or failed recoveries.</strong>
+        MIZERO acts only as a matching tool. We are not liable if an item is never recovered, if
+        a suggested match turns out to be wrong, or for anything that happens during an exchange,
+        meetup, or ownership verification between users — that responsibility is theirs alone.
+      </p>
+      <p className="text-ink/70 leading-relaxed mb-4">
+        <strong className="text-ink">Account termination.</strong> We may suspend or delete an
+        account that posts fake reports, harasses other users, or otherwise misuses the
+        platform, without prior notice.
       </p>
       <p className="text-ink/70 leading-relaxed">
         Since this is a student project, features and data may change or be reset without

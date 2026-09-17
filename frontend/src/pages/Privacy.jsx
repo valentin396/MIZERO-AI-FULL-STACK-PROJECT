@@ -27,6 +27,19 @@ export default function Privacy() {
         suggest possible connections between lost and found reports, but there is no guarantee
         that a lost item will be recovered or that a suggested match is correct.
       </p>
+      <p className="text-ink/70 leading-relaxed mb-4">
+        <strong className="text-ink">Cookies and local storage.</strong> MIZERO doesn't use
+        third-party tracking or advertising cookies. Your browser's local storage is used only to
+        keep you signed in and to remember your preferred language — nothing here is sold or
+        shared with advertisers.
+      </p>
+      <p className="text-ink/70 leading-relaxed mb-4">
+        <strong className="text-ink">Deleting your data.</strong> You can request that your
+        account and report data be deleted at any time via the{' '}
+        <a href="/contact" className="text-clay hover:underline">contact page</a>. We'll remove
+        it within a reasonable time, except where a report is still tied to an active match
+        another user is relying on.
+      </p>
       <p className="text-ink/70 leading-relaxed">
         This project was built for academic purposes. If you have questions about your data,
         reach out via the <a href="/contact" className="text-clay hover:underline">contact page</a>.
