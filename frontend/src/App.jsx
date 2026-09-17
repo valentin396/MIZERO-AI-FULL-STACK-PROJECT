@@ -1,5 +1,6 @@
 import { Routes, Route } from 'react-router-dom';
 import Nav from './components/Nav.jsx';
+import Footer from './components/Footer.jsx';
 import FloatingChat from './components/FloatingChat.jsx';
 import ProtectedRoute from './components/ProtectedRoute.jsx';
 
@@ -9,6 +10,8 @@ import Signup from './pages/Signup.jsx';
 import About from './pages/About.jsx';
 import HowItWorks from './pages/HowItWorks.jsx';
 import Contact from './pages/Contact.jsx';
+import Privacy from './pages/Privacy.jsx';
+import Terms from './pages/Terms.jsx';
 import SearchPage from './pages/SearchPage.jsx';
 import ItemDetail from './pages/ItemDetail.jsx';
 import MatchDetails from './pages/MatchDetails.jsx';
@@ -27,9 +30,9 @@ import DashboardSettings from './pages/DashboardSettings.jsx';
 
 export default function App() {
   return (
-    <>
+    <div className="flex flex-col min-h-screen">
       <Nav />
-      <main>
+      <main className="flex-1">
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
@@ -37,6 +40,8 @@ export default function App() {
           <Route path="/about" element={<About />} />
           <Route path="/how-it-works" element={<HowItWorks />} />
           <Route path="/contact" element={<Contact />} />
+          <Route path="/privacy" element={<Privacy />} />
+          <Route path="/terms" element={<Terms />} />
           <Route path="/search" element={<SearchPage />} />
           <Route path="/items/:id" element={<ItemDetail />} />
           <Route path="/matches/:id" element={<MatchDetails />} />
@@ -56,7 +61,8 @@ export default function App() {
           </Route>
         </Routes>
       </main>
+      <Footer />
       <FloatingChat />
-    </>
+    </div>
   );
 }

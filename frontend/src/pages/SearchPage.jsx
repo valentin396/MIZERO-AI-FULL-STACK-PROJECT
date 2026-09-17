@@ -1,8 +1,8 @@
 import { useEffect, useState, useCallback } from 'react';
-import { Link } from 'react-router-dom';
-import api from '../services/api';
 import { useCategories } from '../services/rwanda.js';
 import { useLanguage } from '../services/language.jsx';
+import api from '../services/api';
+import ItemCard from '../components/ItemCard.jsx';
 
 export default function SearchPage() {
   const { t } = useLanguage();
@@ -10,7 +10,7 @@ export default function SearchPage() {
   const [q, setQ] = useState('');
   const [status, setStatus] = useState('');
   const [category, setCategory] = useState('');
-  const [items, setItems] = useState([]);
+  const [items, setItems] = useState(null);
   const [loading, setLoading] = useState(false);
 
   const fetchItems = useCallback(() => {
@@ -27,36 +27,58 @@ export default function SearchPage() {
     return () => clearTimeout(timer);
   }, [fetchItems]);
 
+  const hasFilters = Boolean(q || status || category);
+
+  function clearFilters() {
+    setQ('');
+    setStatus('');
+    setCategory('');
+  }
+
   return (
     <div className="max-w-5xl mx-auto px-6 py-12">
       <h1 className="text-3xl font-semibold mb-6">{t('search_title')}</h1>
       <div className="flex flex-wrap gap-3 mb-8">
         <input value={q} onChange={(e) => setQ(e.target.value)} placeholder={t('search_placeholder')}
-          className="flex-1 min-w-[220px] border border-ink/20 px-4 py-2 text-sm bg-cream focus:outline-none focus:border-clay" />
-        <select value={status} onChange={(e) => setStatus(e.target.value)} className="border border-ink/20 px-3 py-2 text-sm bg-cream">
+          className="flex-1 min-w-[220px] border border-ink/20 rounded-lg px-4 py-2 text-sm bg-cream focus:outline-none focus:ring-2 focus:ring-clay/40 focus:border-clay" />
+        <select value={status} onChange={(e) => setStatus(e.target.value)} className="border border-ink/20 rounded-lg px-3 py-2 text-sm bg-cream focus:outline-none focus:ring-2 focus:ring-clay/40 focus:border-clay">
           <option value="">{t('all_statuses')}</option>
           <option value="LOST">{t('filter_lost')}</option>
           <option value="FOUND">{t('filter_found')}</option>
           <option value="RECOVERED">{t('stat_recovered')}</option>
         </select>
-        <select value={category} onChange={(e) => setCategory(e.target.value)} className="border border-ink/20 px-3 py-2 text-sm bg-cream">
+        <select value={category} onChange={(e) => setCategory(e.target.value)} className="border border-ink/20 rounded-lg px-3 py-2 text-sm bg-cream focus:outline-none focus:ring-2 focus:ring-clay/40 focus:border-clay">
           <option value="">{t('all_categories')}</option>
           {categories.map((c) => <option key={c} value={c}>{c}</option>)}
         </select>
       </div>
-      {loading ? <p className="text-ink/50 text-sm">…</p> : items.length === 0 ? (
-        <p className="text-ink/50 text-sm">{t('no_results')}</p>
+      {loading || items === null ? (
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {[0, 1, 2, 3, 4, 5].map((i) => (
+            <div key={i} className="animate-pulse border border-ink/15 bg-cream rounded-lg overflow-hidden">
+              <div className="w-full h-36 bg-paper" />
+              <div className="px-4 py-3 space-y-2">
+                <div className="h-3 w-16 bg-paper rounded" />
+                <div className="h-4 w-3/4 bg-paper rounded" />
+                <div className="h-3 w-1/2 bg-paper rounded" />
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : items.length === 0 ? (
+        <div className="flex flex-col items-center text-center py-14 border border-dashed border-ink/15 rounded-lg">
+          <span className="text-4xl mb-3">🔍</span>
+          <p className="text-ink/60 mb-4">{t('no_results')}</p>
+          {hasFilters && (
+            <button onClick={clearFilters} className="border border-ink/20 px-5 py-2 rounded-lg text-sm font-medium hover:border-clay hover:text-clay transition-colors">
+              Clear filters
+            </button>
+          )}
+        </div>
       ) : (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {items.map((item) => (
-            <Link key={item.id} to={`/items/${item.id}`} className="block border border-ink/15 bg-cream px-5 py-4 hover:border-clay transition-colors">
-              <div className="flex items-center justify-between text-xs mb-2">
-                <span className="font-medium uppercase tracking-wide text-hills">{item.status}</span>
-                <span className="text-ink/50">{item.category}</span>
-              </div>
-              <h3 className="text-lg font-medium leading-snug mb-1">{item.title}</h3>
-              <p className="text-sm text-ink/60">{item.location}{item.landmark ? `, ${item.landmark}` : ''}</p>
-            </Link>
+            <ItemCard key={item.id} item={item} />
           ))}
         </div>
       )}

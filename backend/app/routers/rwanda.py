@@ -35,6 +35,23 @@ def popular_areas(db: Session = Depends(get_db)):
     return [{"location": loc, "count": n} for loc, n in rows]
 
 
+@router.get("/platform-stats")
+def platform_stats(db: Session = Depends(get_db)):
+    total_reports = db.query(Item).count()
+    recovered_count = db.query(Item).filter(Item.status == "RECOVERED").count()
+    active_districts = (
+        db.query(Item.location)
+        .filter(Item.location.isnot(None))
+        .distinct()
+        .count()
+    )
+    return {
+        "total_reports": total_reports,
+        "recovered_count": recovered_count,
+        "active_districts": active_districts,
+    }
+
+
 @router.get("/map-items")
 def map_items(db: Session = Depends(get_db)):
     """Every open report placed at its district's coordinates, with a
