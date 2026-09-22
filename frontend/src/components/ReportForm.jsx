@@ -17,9 +17,22 @@ export default function ReportForm({ status }) {
   const [time, setTime] = useState('');
   const [file, setFile] = useState(null);
   const [preview, setPreview] = useState(null);
+  const [questions, setQuestions] = useState([{ question: '', answer: '' }]);
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(null);
   const [error, setError] = useState('');
+
+  function updateQuestion(i, field, value) {
+    setQuestions((qs) => qs.map((q, idx) => (idx === i ? { ...q, [field]: value } : q)));
+  }
+
+  function addQuestion() {
+    setQuestions((qs) => (qs.length >= 3 ? qs : [...qs, { question: '', answer: '' }]));
+  }
+
+  function removeQuestion(i) {
+    setQuestions((qs) => qs.filter((_, idx) => idx !== i));
+  }
 
   function handleFile(e) {
     const f = e.target.files?.[0];
@@ -42,11 +55,18 @@ export default function ReportForm({ status }) {
         image_hash = res.data.hash;
       }
 
+      const verification_questions = status === 'FOUND'
+        ? questions
+            .map((q) => ({ question: q.question.trim(), expected_answer: q.answer.trim() }))
+            .filter((q) => q.question && q.expected_answer)
+        : undefined;
+
       const res = await api.post('/items', {
         status, category: category || categories[0], title, description, color,
         location: location || districts[0]?.name,
         event_date: date, event_time: time || null,
         image_url, image_hash,
+        ...(verification_questions?.length ? { verification_questions } : {}),
       });
       setDone(res.data.id);
     } catch (err) {
@@ -114,6 +134,40 @@ export default function ReportForm({ status }) {
             className="w-full border border-ink/20 px-3 py-2 bg-cream text-sm" />
         </div>
       </div>
+      {status === 'FOUND' && (
+        <div className="border border-ink/10 bg-paper p-3 space-y-3">
+          <div>
+            <p className="text-sm font-medium">{t('verify_section_title')}</p>
+            <p className="text-xs text-ink/50 mt-0.5">{t('verify_section_sub')}</p>
+          </div>
+          <div className="space-y-2">
+            {questions.map((q, i) => (
+              <div key={i} className="flex gap-2 items-start">
+                <div className="flex-1 space-y-1">
+                  <input value={q.question} onChange={(e) => updateQuestion(i, 'question', e.target.value)}
+                    placeholder={t('verify_question_placeholder')}
+                    className="w-full border border-ink/20 px-3 py-2 bg-cream text-sm" />
+                  <input value={q.answer} onChange={(e) => updateQuestion(i, 'answer', e.target.value)}
+                    placeholder={t('verify_answer_placeholder')}
+                    className="w-full border border-ink/20 px-3 py-2 bg-cream text-sm" />
+                </div>
+                {questions.length > 1 && (
+                  <button type="button" onClick={() => removeQuestion(i)}
+                    className="text-xs text-clay hover:underline mt-2 whitespace-nowrap">
+                    {t('verify_remove_question')}
+                  </button>
+                )}
+              </div>
+            ))}
+          </div>
+          {questions.length < 3 && (
+            <button type="button" onClick={addQuestion} className="text-xs text-clay hover:underline">
+              {t('verify_add_question')}
+            </button>
+          )}
+        </div>
+      )}
+
       <div>
         <label className="block text-xs text-ink/50 mb-1">{t('upload_image')}</label>
         <div className="flex items-center gap-3">

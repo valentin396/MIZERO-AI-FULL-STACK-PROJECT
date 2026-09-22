@@ -2,33 +2,35 @@ import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import api from '../services/api';
 import { useAuth } from '../services/auth.jsx';
+import { useLanguage } from '../services/language.jsx';
 import ConfidenceRing from '../components/ConfidenceRing.jsx';
 import BreakdownBar from '../components/BreakdownBar.jsx';
+import VerificationForm from '../components/VerificationForm.jsx';
 
 export default function MatchDetails() {
   const { id } = useParams();
   const { user } = useAuth();
+  const { t } = useLanguage();
   const [match, setMatch] = useState(null);
-  const [revealed, setRevealed] = useState(false);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    api.get(`/matches/${id}`).then((res) => {
-      setMatch(res.data);
-      setRevealed(res.data.status === 'confirmed');
-    });
+    refresh();
   }, [id]);
+
+  function refresh() {
+    return api.get(`/matches/${id}`).then((res) => setMatch(res.data));
+  }
 
   if (!match) return <div className="max-w-3xl mx-auto px-6 py-12 text-ink/40">Loading…</div>;
 
   const isOwner = user && (match.lost_item.user_id === user.id || match.found_item.user_id === user.id);
-  const otherItem = user && match.lost_item.user_id === user.id ? match.found_item : match.lost_item;
+  const isClaimant = user && match.lost_item.user_id === user.id;
 
   async function act(status) {
     setSaving(true);
-    const res = await api.patch(`/matches/${id}`, { status });
-    setMatch((m) => ({ ...m, status: res.data.status }));
-    if (status === 'confirmed') setRevealed(true);
+    await api.patch(`/matches/${id}`, { status });
+    await refresh();
     setSaving(false);
   }
 
@@ -61,11 +63,23 @@ export default function MatchDetails() {
           <p className="text-sm text-ink/60 mb-4">This is a potential match — verify with the person who reported the other item.</p>
           {match.status === 'rejected' ? (
             <p className="text-sm text-ink/50">You marked this as not a match.</p>
-          ) : revealed ? (
+          ) : match.status === 'confirmed' && match.contact ? (
             <div className="border border-hills bg-hills/5 p-4">
-              <p className="text-sm font-medium text-hills mb-1">Contact details</p>
-              <p className="text-sm">{otherItem.color ? `${otherItem.color} ` : ''}{otherItem.title}</p>
+              <p className="text-sm font-medium text-hills mb-1">{t('contact_details_title')}</p>
+              <p className="text-sm">{match.contact.name}</p>
+              {match.contact.phone && <p className="text-sm">{match.contact.phone}</p>}
+              {match.contact.email && <p className="text-sm">{match.contact.email}</p>}
             </div>
+          ) : match.status === 'confirmed' && match.verification?.required && isClaimant ? (
+            <VerificationForm matchId={id} onPassed={() => refresh()} />
+          ) : match.status === 'confirmed' && match.verification?.required ? (
+            <div className="border border-ink/15 bg-paper p-4">
+              <p className="text-sm font-medium mb-1">{t('verify_waiting_title')}</p>
+              <p className="text-sm text-ink/60 mb-2">{t('verify_waiting_sub')}</p>
+              <p className="text-xs text-ink/50">{match.verification.correct}/{match.verification.total}</p>
+            </div>
+          ) : match.status === 'confirmed' ? (
+            <p className="text-sm text-ink/50">Loading contact details…</p>
           ) : (
             <div className="flex gap-3">
               <button onClick={() => act('confirmed')} disabled={saving}

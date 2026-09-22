@@ -1,9 +1,12 @@
+import json
+from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.database import get_db
-from app.models import User, Item, Match, Notification
+from app.models import User, Item, Match, Notification, OwnershipVerification
 from app.schemas import MatchStatusUpdate
-from app.deps import get_current_user
+from app.deps import get_current_user, get_current_user_optional
+from app.routers.verification import compute_verification
 
 router = APIRouter(prefix="/api/matches", tags=["matches"])
 
@@ -27,12 +30,22 @@ def list_matches(db: Session = Depends(get_db), user: User = Depends(get_current
 
 
 @router.get("/{match_id}")
-def get_match(match_id: int, db: Session = Depends(get_db)):
+def get_match(match_id: int, db: Session = Depends(get_db), user: Optional[User] = Depends(get_current_user_optional)):
     m = db.query(Match).filter(Match.id == match_id).first()
     if not m:
         raise HTTPException(status_code=404, detail="Not found")
     lost = db.query(Item).filter(Item.id == m.lost_item_id).first()
     found = db.query(Item).filter(Item.id == m.found_item_id).first()
+
+    verification = None
+    contact = None
+    if user and user.id in (lost.user_id, found.user_id):
+        verification = compute_verification(db, m.id)
+        if m.status == "confirmed" and verification["passed"]:
+            other_user_id = found.user_id if user.id == lost.user_id else lost.user_id
+            other = db.query(User).filter(User.id == other_user_id).first()
+            contact = {"name": other.name, "phone": other.phone, "email": other.email}
+
     return {
         "id": m.id,
         "status": m.status,
@@ -43,6 +56,8 @@ def get_match(match_id: int, db: Session = Depends(get_db)):
         },
         "lost_item": lost,
         "found_item": found,
+        "verification": verification,
+        "contact": contact,
     }
 
 
@@ -64,6 +79,7 @@ def update_match(match_id: int, payload: MatchStatusUpdate, db: Session = Depend
     if payload.status == "confirmed":
         lost.status = "RECOVERED"
         found.status = "RECOVERED"
+        _create_verification_rows(db, m, lost, found)
         for uid in (lost.user_id, found.user_id):
             db.add(Notification(
                 user_id=uid, match_id=m.id,
@@ -73,3 +89,30 @@ def update_match(match_id: int, payload: MatchStatusUpdate, db: Session = Depend
 
     db.commit()
     return {"id": m.id, "status": m.status}
+
+
+def _create_verification_rows(db: Session, m: Match, lost: Item, found: Item):
+    """Called when a match is confirmed. If the found-item reporter set
+    security questions, create one ownership_verifications row per question,
+    assigned to the claimant (the lost-item reporter) — they must answer
+    all of them correctly before either side's contact details are shown.
+    Idempotent: a match can only be confirmed once meaningfully, but PATCH
+    could in principle be called again."""
+    already = db.query(OwnershipVerification).filter(OwnershipVerification.match_id == m.id).first()
+    if already:
+        return
+    if not found.verification_questions:
+        return
+    try:
+        questions = json.loads(found.verification_questions)
+    except (TypeError, ValueError):
+        questions = []
+    for q in questions[:3]:
+        question = (q.get("question") or "").strip()
+        expected = (q.get("expected_answer") or "").strip()
+        if not question or not expected:
+            continue
+        db.add(OwnershipVerification(
+            match_id=m.id, user_id=lost.user_id,
+            question=question, expected_answer=expected,
+        ))

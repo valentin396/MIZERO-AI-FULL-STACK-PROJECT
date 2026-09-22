@@ -90,6 +90,37 @@ export const TRANSLATIONS = {
   upload_image: { en: 'Upload Image', rw: 'Ohereza ifoto', fr: 'Télécharger une image' },
   submit_report: { en: 'Submit Report', rw: 'Ohereza raporo', fr: 'Soumettre le signalement' },
 
+  // Ownership verification
+  verify_section_title: { en: 'Security questions (optional)', rw: "Ibibazo by'umutekano (ntibyo bihatirwa)", fr: 'Questions de sécurité (facultatif)' },
+  verify_section_sub: {
+    en: "Add up to 3 questions only the real owner could answer (e.g. \"What color is the case?\"). Whoever claims this item will need to answer them correctly before you exchange contact details.",
+    rw: "Ongeraho ibibazo bitatu ku bunini uwaba nyir'ikintu wenyine yamenya kubisubiza (urugero: \"Ubwoko bw'ikintu ni ubuhe?\"). Uwavuga ko ari icye azagomba kubisubiza neza mbere yuko muhererekanya imibare y'itumanaho.",
+    fr: "Ajoutez jusqu'à 3 questions auxquelles seul le vrai propriétaire saurait répondre. La personne qui réclame cet objet devra y répondre correctement avant l'échange des coordonnées.",
+  },
+  verify_question_label: { en: 'Question', rw: 'Ikibazo', fr: 'Question' },
+  verify_answer_label: { en: 'Expected answer', rw: "Igisubizo nyacyo", fr: 'Réponse attendue' },
+  verify_question_placeholder: { en: 'e.g. What color is the case?', rw: "urugero: Ubwoko bw'ikintu ni ubuhe?", fr: 'ex. De quelle couleur est la housse ?' },
+  verify_answer_placeholder: { en: 'e.g. black with a small crack', rw: 'urugero: umukara, ufite igicu gito', fr: 'ex. noire avec une petite fissure' },
+  verify_add_question: { en: '+ Add another question', rw: '+ Ongeraho ikindi kibazo', fr: '+ Ajouter une autre question' },
+  verify_remove_question: { en: 'Remove', rw: 'Kuraho', fr: 'Retirer' },
+
+  verify_gate_title: { en: 'Prove this is your item', rw: "Erekana ko iki ari ikintu cyawe", fr: 'Prouvez que cet objet est le vôtre' },
+  verify_gate_sub: {
+    en: "The person who found this item set a few security questions. Answer them correctly to unlock contact details.",
+    rw: "Uwabonye iki kintu yashyizeho ibibazo by'umutekano. Bisubize neza kugira ngo ubone imibare y'itumanaho.",
+    fr: "La personne qui a trouvé cet objet a défini quelques questions de sécurité. Répondez-y correctement pour débloquer les coordonnées.",
+  },
+  verify_submit_btn: { en: 'Submit answers', rw: 'Ohereza ibisubizo', fr: 'Envoyer les réponses' },
+  verify_result_pass: { en: 'Verified ✅', rw: 'Byemejwe ✅', fr: 'Vérifié ✅' },
+  verify_result_fail: { en: 'Not verified', rw: 'Ntibyemejwe', fr: 'Non vérifié' },
+  verify_waiting_title: { en: 'Waiting for verification', rw: 'Gutegereza kwemezwa', fr: 'En attente de vérification' },
+  verify_waiting_sub: {
+    en: "This person needs to correctly answer your security questions before contact details are shared.",
+    rw: "Uyu muntu agomba gusubiza neza ibibazo by'umutekano mbere yuko imibare y'itumanaho isangizwa.",
+    fr: "Cette personne doit répondre correctement à vos questions de sécurité avant le partage des coordonnées.",
+  },
+  contact_details_title: { en: 'Contact details', rw: "Amakuru y'itumanaho", fr: 'Coordonnées' },
+
   // Map
   map_title: { en: 'Reports Map', rw: 'Ikarita y\'amaraporo', fr: 'Carte des signalements' },
   map_sub: { en: 'Every open report, placed by real district.', rw: 'Buri raporo ifunguye, yerekanwe hakurikijwe akarere nyakuri.', fr: 'Chaque signalement ouvert, placé par vrai district.' },

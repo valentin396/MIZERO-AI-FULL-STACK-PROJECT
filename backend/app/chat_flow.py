@@ -11,8 +11,41 @@ STEP_ORDER = [
 NEXT_STEP = {STEP_ORDER[i]: STEP_ORDER[i + 1] for i in range(len(STEP_ORDER) - 1)}
 NEXT_STEP["DONE"] = "DONE"
 
+# The field each step's answer fills in the draft (mirrors apply_answer
+# below). Used by resume_step() to skip past slots the free-text NLU parser
+# (app/nlp/intent.py) already filled in.
+FIELD_FOR_STEP = {
+    "GREETING": "status",
+    "ASK_STATUS": "category",
+    "ASK_CATEGORY": "title",
+    "ASK_TITLE": "description",
+    "ASK_DESCRIPTION": "location",
+    "ASK_LOCATION": "landmark",
+    "ASK_LANDMARK": "date_occurred",
+    "ASK_DATE": "urgency",
+    "ASK_URGENCY": "contact_name",
+    "ASK_NAME": "contact_phone",
+}
+
+
+def resume_step(draft: dict) -> str:
+    """Given a draft that's already partially filled in (e.g. by free-text
+    NLU), find the earliest step whose field is still missing, so the
+    scripted flow continues from there instead of re-asking what's known."""
+    for step in STEP_ORDER:
+        field = FIELD_FOR_STEP.get(step)
+        if field is not None and not draft.get(field):
+            return step
+    return "ASK_PHONE"
+
 
 def options_for(step: str, draft: dict) -> list[str] | None:
+    # Keyed by the step whose *prompt* is currently being shown (matching
+    # prompt_for below), not by the step name that sounds related — e.g.
+    # prompt_for("ASK_DATE") asks the urgency question, so the urgency
+    # buttons belong here, not on "ASK_URGENCY" (whose prompt asks for a
+    # name). Getting this pairing wrong previously meant the urgency and
+    # final yes/no buttons never showed up.
     if step == "GREETING":
         return ["Lost", "Found"]
     if step == "ASK_STATUS":
@@ -22,9 +55,12 @@ def options_for(step: str, draft: dict) -> list[str] | None:
     if step == "ASK_LOCATION":
         sectors = sectors_for(draft.get("location", ""))
         return sectors or None
-    if step == "ASK_URGENCY":
-        return URGENCY_LEVELS
-    if step == "CONFIRM":
+    if step == "ASK_DATE":
+        # prompt_for only asks the urgency question for LOST reports — a
+        # FOUND report gets an open-ended condition question instead, so
+        # there's nothing to offer as quick-reply buttons there.
+        return URGENCY_LEVELS if draft.get("status") == "LOST" else None
+    if step == "ASK_PHONE":
         return ["Yego (Yes)", "Oya (No)"]
     return None
 
@@ -59,6 +95,10 @@ def prompt_for(step: str, draft: dict) -> str:
     if step == "ASK_PHONE":
         return _summary(draft) + "\n\nShall I submit this report? (yego/oya)"
     if step == "CONFIRM":
+        # Not reached in the normal flow — the router now handles the
+        # yego/oya answer to the ASK_PHONE prompt directly and moves
+        # straight to DONE, since that's the point where the report is
+        # actually created. Kept only so this function stays total.
         return "Thanks — your report is live. MIZERO will notify you if a match is found."
     if step == "DONE":
         return "This report is complete. Start a new chat to report another item."
@@ -106,6 +146,8 @@ def apply_answer(step: str, draft: dict, answer: str) -> tuple[dict, str]:
         d["contact_name"] = text
     elif step == "ASK_NAME":
         d["contact_phone"] = text
-    # ASK_PHONE -> CONFIRM is handled by the router (submit or restart)
+    # The yego/oya answer to the ASK_PHONE prompt (submit or restart) is
+    # handled directly by the router, before this function is ever called
+    # for that step.
 
     return d, NEXT_STEP[step]

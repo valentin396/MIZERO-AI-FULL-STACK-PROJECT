@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, EmailStr, Field, field_validator
 from typing import Optional
 from datetime import datetime, date, time
 
@@ -36,6 +36,11 @@ class TokenOut(BaseModel):
 
 # --- Items ---
 
+class VerificationQuestionIn(BaseModel):
+    question: str = Field(min_length=3, max_length=300)
+    expected_answer: str = Field(min_length=1, max_length=300)
+
+
 class ItemCreate(BaseModel):
     status: str  # LOST | FOUND
     category: str
@@ -48,6 +53,17 @@ class ItemCreate(BaseModel):
     event_time: Optional[time] = None
     image_url: Optional[str] = None
     image_hash: Optional[str] = None
+    # Optional, only meaningful when status="FOUND": 1-3 security questions
+    # the finder sets so a later claimant can prove ownership before contact
+    # details are exchanged. See app/routers/verification.py.
+    verification_questions: Optional[list[VerificationQuestionIn]] = None
+
+    @field_validator("verification_questions")
+    @classmethod
+    def _max_three_questions(cls, v):
+        if v and len(v) > 3:
+            raise ValueError("You can add at most 3 verification questions.")
+        return v
 
 
 class ItemOut(BaseModel):
@@ -108,6 +124,17 @@ class MatchStatusUpdate(BaseModel):
     status: str  # confirmed | rejected
 
 
+# --- Ownership verification ---
+
+class VerificationAnswerItem(BaseModel):
+    id: int
+    answer: str = Field(min_length=1, max_length=300)
+
+
+class VerificationAnswerBatch(BaseModel):
+    answers: list[VerificationAnswerItem]
+
+
 # --- Chat ---
 
 class ChatMessageIn(BaseModel):
@@ -122,6 +149,11 @@ class ChatMessageOut(BaseModel):
     options: Optional[list[str]] = None
     done: bool
     item_id: Optional[int] = None
+    # Populated only when the free-text NLU parser (app/nlp/) ran on this
+    # turn — a "search" intent's top matches, and a human-readable trace of
+    # which words drove the detected language/action/category/location.
+    search_results: Optional[list[dict]] = None
+    nlu_explain: Optional[list[str]] = None
 
 
 # --- Notifications ---

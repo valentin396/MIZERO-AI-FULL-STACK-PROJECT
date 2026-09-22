@@ -2,7 +2,7 @@ from sqlalchemy import (
     Column, Integer, String, Text, Float, Boolean, Date, Time,
     DateTime, ForeignKey, UniqueConstraint
 )
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, deferred
 from sqlalchemy.sql import func
 from app.database import Base
 
@@ -49,6 +49,16 @@ class Item(Base):
     image_hash = Column(String(16))  # perceptual hash (dHash), for image similarity
 
     search_text = Column(Text)  # denormalized text used by the text-matching engine
+
+    # JSON-encoded list of {"question": str, "expected_answer": str}, set
+    # optionally by a FOUND-item reporter. `deferred` so a plain `db.query`
+    # never loads it into the object's __dict__ — FastAPI's default
+    # jsonable_encoder falls back to vars(obj) for non-pydantic objects, so an
+    # eagerly-loaded column here would leak expected_answer to anyone viewing
+    # the item/match, defeating the whole point of the verification feature.
+    # Only app/routers/verification.py (and the create/match-confirm paths)
+    # ever touch this attribute directly.
+    verification_questions = deferred(Column(Text))
 
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 

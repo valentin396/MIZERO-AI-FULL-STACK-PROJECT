@@ -6,11 +6,18 @@ from app.database import get_db
 from app.models import User, ChatSession, ChatMessage, Item
 from app.schemas import ChatMessageIn, ChatMessageOut
 from app.deps import get_current_user
-from app.chat_flow import prompt_for, options_for, apply_answer
-from app.matching.text import build_search_text
+from app.chat_flow import prompt_for, options_for, apply_answer, resume_step
+from app.matching.text import build_search_text, tokenize
 from app.routers.items import _run_matching
+from app.nlp.language import detect_language, LANG_NAMES
+from app.nlp.intent import parse_intent
+from app.nlp import replies as nlp_replies
 
 router = APIRouter(prefix="/api/chat", tags=["chat"])
+
+# Below this, free-text is treated as too ambiguous to act on — the bot asks
+# a clarifying question instead of guessing.
+CONFIDENCE_THRESHOLD = 0.45
 
 
 @router.post("", response_model=ChatMessageOut)
@@ -36,7 +43,11 @@ def chat(payload: ChatMessageIn, db: Session = Depends(get_db), user: User = Dep
     step = session.step
     draft = json.loads(session.draft)
 
-    if step == "CONFIRM":
+    if step == "ASK_PHONE":
+        # This is the answer to the "Shall I submit this report? (yego/oya)"
+        # prompt shown at the ASK_PHONE step (see chat_flow.prompt_for) —
+        # handling it here, at the step that actually asked the question,
+        # is what makes "your report is live" true when the bot says it.
         yes = payload.message.strip().lower().startswith(("y", "yego"))
         if not yes:
             session.step = "GREETING"
@@ -80,6 +91,15 @@ def chat(payload: ChatMessageIn, db: Session = Depends(get_db), user: User = Dep
         db.commit()
         return ChatMessageOut(session_id=session.id, reply=reply, step="DONE", done=True, item_id=item.id)
 
+    # Only treat input as free text for NLU when the bot is at its opening
+    # question and the message isn't one of the quick-reply button labels —
+    # everywhere else in the scripted flow, a typed answer is just the
+    # answer to whatever was asked (e.g. a title or a phone number), not a
+    # sentence to run intent extraction on.
+    current_options = options_for(step, draft) or []
+    if step == "GREETING" and payload.message.strip() not in current_options:
+        return _handle_free_text(db, session, payload.message)
+
     next_draft, next_step = apply_answer(step, draft, payload.message)
     session.step = next_step
     session.draft = json.dumps(next_draft)
@@ -101,6 +121,97 @@ def chat_history(session_id: int, db: Session = Depends(get_db), user: User = De
     if not session:
         return []
     return db.query(ChatMessage).filter(ChatMessage.session_id == session_id).order_by(ChatMessage.created_at).all()
+
+
+def _handle_free_text(db: Session, session: ChatSession, text: str) -> ChatMessageOut:
+    lang, lang_scores = detect_language(text)
+    parsed = parse_intent(text)
+    explain = [
+        f'language="{LANG_NAMES[lang]}" (scores en={lang_scores["en"]}, rw={lang_scores["rw"]}, fr={lang_scores["fr"]})',
+        *parsed["explain"],
+    ]
+
+    if parsed["action"] == "search":
+        return _handle_search(db, session, lang, parsed, explain)
+
+    if parsed["action"] in ("lost", "found") and parsed["confidence"] >= CONFIDENCE_THRESHOLD:
+        draft = {
+            "status": "FOUND" if parsed["action"] == "found" else "LOST",
+            "title": parsed["title"],
+            "description": parsed["description"],
+        }
+        for field in ("category", "location", "landmark"):
+            if parsed[field]:
+                draft[field] = parsed[field]
+        if parsed["event_date"]:
+            draft["date_occurred"] = parsed["event_date"]
+
+        next_step = resume_step(draft)
+        session.step = next_step
+        session.draft = json.dumps(draft)
+        db.commit()
+
+        confirmation = nlp_replies.confirm_report(lang, parsed["action"], parsed["category"], draft.get("location"), draft.get("landmark"))
+        reply = f"{confirmation}\n\n{prompt_for(next_step, draft)}"
+        db.add(ChatMessage(session_id=session.id, sender="bot", message=reply))
+        db.commit()
+        return ChatMessageOut(
+            session_id=session.id, reply=reply, step=next_step,
+            options=options_for(next_step, draft), done=False, nlu_explain=explain,
+        )
+
+    # Low confidence, or an action we couldn't pin down at all — ask a
+    # clarifying question in the same language rather than guessing, and
+    # stay put so the next message is tried again from scratch.
+    if not parsed["action"]:
+        reply = nlp_replies.clarify_action(lang)
+    else:
+        reply = nlp_replies.clarify_details(lang, parsed["missing"] or ["category", "location"])
+    db.add(ChatMessage(session_id=session.id, sender="bot", message=reply))
+    db.commit()
+    return ChatMessageOut(
+        session_id=session.id, reply=reply, step="GREETING",
+        options=options_for("GREETING", {}), done=False, nlu_explain=explain,
+    )
+
+
+def _handle_search(db: Session, session: ChatSession, lang: str, parsed: dict, explain: list[str]) -> ChatMessageOut:
+    q_tokens = set(tokenize(parsed["description"]).split())
+    query = db.query(Item)
+    if parsed["category"]:
+        query = query.filter(Item.category == parsed["category"])
+    if parsed["location"]:
+        query = query.filter(Item.location == parsed["location"])
+    candidates = query.order_by(Item.created_at.desc()).limit(200).all()
+
+    scored = []
+    for it in candidates:
+        it_tokens = set(tokenize(it.search_text or "").split())
+        hits = len(q_tokens & it_tokens)
+        if hits > 0 or parsed["category"] or parsed["location"]:
+            scored.append((hits, it))
+    scored.sort(key=lambda x: x[0], reverse=True)
+    top = [it for _, it in scored[:5]]
+
+    intro = nlp_replies.confirm_search(lang, parsed["category"], parsed["location"])
+    if top:
+        lines = [f"• {it.title} ({it.status.title()}, {it.location}{', ' + it.landmark if it.landmark else ''})" for it in top]
+        reply = intro + "\n" + nlp_replies.results_summary(lang, len(top)) + "\n" + "\n".join(lines)
+    else:
+        reply = intro + "\n" + nlp_replies.no_results(lang)
+
+    db.add(ChatMessage(session_id=session.id, sender="bot", message=reply))
+    db.commit()
+
+    results = [{
+        "id": it.id, "title": it.title, "status": it.status,
+        "category": it.category, "location": it.location, "landmark": it.landmark,
+    } for it in top]
+    return ChatMessageOut(
+        session_id=session.id, reply=reply, step="GREETING",
+        options=options_for("GREETING", {}), done=False,
+        search_results=results, nlu_explain=explain,
+    )
 
 
 def _parse_date(text: str | None):

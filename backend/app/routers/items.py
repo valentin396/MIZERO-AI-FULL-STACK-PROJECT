@@ -1,3 +1,4 @@
+import json
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from typing import Optional
@@ -49,6 +50,16 @@ def create_item(payload: ItemCreate, db: Session = Depends(get_db), user: User =
         payload.landmark or "", payload.color or "",
     )
 
+    verification_questions_json = None
+    if payload.verification_questions:
+        cleaned = [
+            {"question": q.question.strip(), "expected_answer": q.expected_answer.strip()}
+            for q in payload.verification_questions
+            if q.question.strip() and q.expected_answer.strip()
+        ]
+        if cleaned:
+            verification_questions_json = json.dumps(cleaned)
+
     item = Item(
         user_id=user.id,
         status=payload.status,
@@ -63,6 +74,7 @@ def create_item(payload: ItemCreate, db: Session = Depends(get_db), user: User =
         image_url=payload.image_url,
         image_hash=payload.image_hash,
         search_text=search_text,
+        verification_questions=verification_questions_json,
     )
     db.add(item)
     db.commit()
