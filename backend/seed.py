@@ -103,7 +103,10 @@ def run():
             db.add(admin)
             db.commit()
 
-        for s in SAMPLES:
+        existing_titles = {title for (title,) in db.query(Item.title).all()}
+        new_samples = [s for s in SAMPLES if s["title"] not in existing_titles]
+
+        for s in new_samples:
             search_text = build_search_text(s["title"], s["description"], s["category"], s["location"], s["landmark"])
             db.add(Item(
                 user_id=demo.id, status=s["status"], category=s["category"],
@@ -115,8 +118,8 @@ def run():
 
         _seed_matches(db)
 
-        print(f"Seeded {len(SAMPLES)} reports. Demo login: demo@mizero.rw / demo1234. "
-              f"Admin login: admin@mizero.rw / admin1234.")
+        print(f"Seeded {len(new_samples)} new reports ({len(SAMPLES) - len(new_samples)} already present). "
+              f"Demo login: demo@mizero.rw / demo1234. Admin login: admin@mizero.rw / admin1234.")
     finally:
         db.close()
 

@@ -3,6 +3,7 @@ import Nav from './components/Nav.jsx';
 import Footer from './components/Footer.jsx';
 import FloatingChat from './components/FloatingChat.jsx';
 import ProtectedRoute from './components/ProtectedRoute.jsx';
+import BackendWakeUp from './components/BackendWakeUp.jsx';
 
 import Home from './pages/Home.jsx';
 import Login from './pages/Login.jsx';
@@ -30,39 +31,41 @@ import DashboardSettings from './pages/DashboardSettings.jsx';
 
 export default function App() {
   return (
-    <div className="flex flex-col min-h-screen">
-      <Nav />
-      <main className="flex-1">
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<Signup />} />
-          <Route path="/about" element={<About />} />
-          <Route path="/how-it-works" element={<HowItWorks />} />
-          <Route path="/contact" element={<Contact />} />
-          <Route path="/privacy" element={<Privacy />} />
-          <Route path="/terms" element={<Terms />} />
-          <Route path="/search" element={<SearchPage />} />
-          <Route path="/items/:id" element={<ItemDetail />} />
-          <Route path="/matches/:id" element={<MatchDetails />} />
-          <Route path="/map" element={<MapPage />} />
-          <Route path="/admin" element={<AdminDashboard />} />
+    <BackendWakeUp>
+      <div className="flex flex-col min-h-screen">
+        <Nav />
+        <main className="flex-1">
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<Signup />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/how-it-works" element={<HowItWorks />} />
+            <Route path="/contact" element={<Contact />} />
+            <Route path="/privacy" element={<Privacy />} />
+            <Route path="/terms" element={<Terms />} />
+            <Route path="/search" element={<SearchPage />} />
+            <Route path="/items/:id" element={<ItemDetail />} />
+            <Route path="/matches/:id" element={<MatchDetails />} />
+            <Route path="/map" element={<MapPage />} />
+            <Route path="/admin" element={<AdminDashboard />} />
 
-          <Route path="/report" element={<ProtectedRoute><ReportPage /></ProtectedRoute>} />
+            <Route path="/report" element={<ProtectedRoute><ReportPage /></ProtectedRoute>} />
 
-          <Route path="/dashboard" element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>
-            <Route index element={<DashboardHome />} />
-            <Route path="reports" element={<MyReports />} />
-            <Route path="matches" element={<MatchesList />} />
-            <Route path="notifications" element={<Notifications />} />
-            <Route path="chat" element={<DashboardChat />} />
-            <Route path="profile" element={<Profile />} />
-            <Route path="settings" element={<DashboardSettings />} />
-          </Route>
-        </Routes>
-      </main>
-      <Footer />
-      <FloatingChat />
-    </div>
+            <Route path="/dashboard" element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>
+              <Route index element={<DashboardHome />} />
+              <Route path="reports" element={<MyReports />} />
+              <Route path="matches" element={<MatchesList />} />
+              <Route path="notifications" element={<Notifications />} />
+              <Route path="chat" element={<DashboardChat />} />
+              <Route path="profile" element={<Profile />} />
+              <Route path="settings" element={<DashboardSettings />} />
+            </Route>
+          </Routes>
+        </main>
+        <Footer />
+        <FloatingChat />
+      </div>
+    </BackendWakeUp>
   );
 }
