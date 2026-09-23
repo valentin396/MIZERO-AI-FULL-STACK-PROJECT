@@ -72,6 +72,10 @@ class ChatSession(Base):
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     step = Column(String(30), default="GREETING")
     draft = Column(Text, default="{}")  # JSON-encoded partial item fields
+    # 'llm' (OpenAI-driven conversation) or 'rule' (chat_flow.py FSM). Chosen
+    # once when the session starts and can drop from 'llm' to 'rule' mid-chat
+    # if an OpenAI call fails — see app/routers/chat.py.
+    mode = Column(String(10), default="rule")
     item_id = Column(Integer, ForeignKey("items.id"), nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())

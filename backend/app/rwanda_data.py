@@ -1,6 +1,7 @@
 # Rwanda's real 5 provinces / 30 districts, with sector lists for
 # Kigali City's three districts and approximate district-centroid
 # coordinates for the map.
+import re
 
 DISTRICTS = [
     {"name": "Gasabo", "province": "Kigali City", "lat": -1.9346, "lng": 30.1105,
@@ -70,3 +71,27 @@ def coords_for(district_name: str) -> tuple[float, float]:
         if d["name"] == district_name:
             return d["lat"], d["lng"]
     return -1.9403, 29.8739  # fallback: Rwanda's center
+
+
+_SECTOR_TO_DISTRICT: dict[str, str] | None = None
+
+
+def district_for_sector(text: str) -> str | None:
+    """Given free text that may name a Rwandan sector (e.g. a chat landmark
+    like "Remera" or "near the Remera taxi park"), returns the district that
+    sector actually belongs to, or None if no known sector is found in it.
+
+    This is ground-truth data, not something worth trusting an LLM's own
+    geography knowledge for — see app/llm_chat.py, which uses this to
+    correct the model's guessed 'location' against whatever sector it put
+    in 'landmark'."""
+    global _SECTOR_TO_DISTRICT
+    if _SECTOR_TO_DISTRICT is None:
+        _SECTOR_TO_DISTRICT = {
+            sector.lower(): d["name"] for d in DISTRICTS for sector in d.get("sectors", [])
+        }
+    text_lower = (text or "").lower()
+    for sector_lower, district in _SECTOR_TO_DISTRICT.items():
+        if re.search(rf"\b{re.escape(sector_lower)}\b", text_lower):
+            return district
+    return None
