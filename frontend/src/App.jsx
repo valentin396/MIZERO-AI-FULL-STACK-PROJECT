@@ -1,5 +1,5 @@
 import { Routes, Route } from 'react-router-dom';
-import Nav from './components/Nav.jsx';
+import Nav, { NAV_HEIGHT } from './components/Nav.jsx';
 import Footer from './components/Footer.jsx';
 import FloatingChat from './components/FloatingChat.jsx';
 import ProtectedRoute from './components/ProtectedRoute.jsx';
@@ -34,7 +34,12 @@ export default function App() {
     <BackendWakeUp>
       <div className="flex flex-col min-h-screen">
         <Nav />
-        <main className="flex-1">
+        {/* Nav is fixed (so it can overlay the homepage hero transparently),
+            so every other page needs matching top padding to avoid its
+            content starting underneath it. Home cancels this with a
+            matching negative margin on its hero section — see
+            pages/Home.jsx — and NAV_HEIGHT keeps both in sync. */}
+        <main className="flex-1" style={{ paddingTop: NAV_HEIGHT }}>
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<Login />} />

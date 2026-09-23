@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useCategories } from '../services/rwanda.js';
 import { useLanguage } from '../services/language.jsx';
 import api from '../services/api';
@@ -7,9 +8,10 @@ import ItemCard from '../components/ItemCard.jsx';
 export default function SearchPage() {
   const { t } = useLanguage();
   const categories = useCategories();
-  const [q, setQ] = useState('');
-  const [status, setStatus] = useState('');
-  const [category, setCategory] = useState('');
+  const [searchParams] = useSearchParams();
+  const [q, setQ] = useState(() => searchParams.get('q') || '');
+  const [status, setStatus] = useState(() => searchParams.get('status') || '');
+  const [category, setCategory] = useState(() => searchParams.get('category') || '');
   const [items, setItems] = useState(null);
   const [loading, setLoading] = useState(false);
 
@@ -26,6 +28,16 @@ export default function SearchPage() {
     const timer = setTimeout(fetchItems, 300);
     return () => clearTimeout(timer);
   }, [fetchItems]);
+
+  // Keeps filters in sync if the URL's query string changes while this page
+  // is already mounted (e.g. clicking a category link from elsewhere without
+  // a full navigation, or browser back/forward).
+  useEffect(() => {
+    setQ(searchParams.get('q') || '');
+    setStatus(searchParams.get('status') || '');
+    setCategory(searchParams.get('category') || '');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams.toString()]);
 
   const hasFilters = Boolean(q || status || category);
 

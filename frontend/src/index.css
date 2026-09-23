@@ -21,3 +21,75 @@ body {
 .animate-float {
   animation: float 5s ease-in-out infinite;
 }
+
+/* Scroll-reveal: base hidden state + visible state toggled by the Reveal
+   component's IntersectionObserver. --reveal-delay lets callers stagger
+   siblings without extra keyframes. */
+.reveal {
+  opacity: 0;
+  transform: translateY(18px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+  transition-delay: var(--reveal-delay, 0ms);
+}
+.reveal-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@keyframes bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+.animate-bob {
+  animation: bob 3.6s ease-in-out infinite;
+}
+
+@keyframes pin-pulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.35); opacity: 0.55; }
+}
+.animate-pin-pulse {
+  animation: pin-pulse 2.4s ease-in-out infinite;
+}
+
+@keyframes glow-ring {
+  0%, 100% { opacity: 0.35; transform: scale(1); }
+  50% { opacity: 0.6; transform: scale(1.06); }
+}
+.animate-glow-ring {
+  animation: glow-ring 4s ease-in-out infinite;
+}
+
+@keyframes pop-bounce {
+  0% { transform: scale(0.75); opacity: 0; }
+  60% { transform: scale(1.08); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+/* Starts at the animation's 0% state and stays there until the ancestor
+   .reveal is scrolled into view -- .animate-pop-bounce is applied always,
+   but the keyframes only *run* once .reveal-visible lands on the ancestor,
+   so the pop plays when it's actually visible, not the moment it mounts
+   off-screen (which would finish before the user ever scrolls to it). */
+.animate-pop-bounce {
+  transform: scale(0.75);
+  opacity: 0;
+}
+.reveal-visible .animate-pop-bounce {
+  animation: pop-bounce 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  animation-delay: var(--pop-delay, 0ms);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    transition: opacity 0.2s ease;
+    transform: none;
+  }
+  .animate-float, .animate-bob, .animate-pin-pulse, .animate-glow-ring {
+    animation: none !important;
+  }
+  .animate-pop-bounce, .reveal-visible .animate-pop-bounce {
+    animation: none !important;
+    transform: none !important;
+    opacity: 1 !important;
+  }
+}

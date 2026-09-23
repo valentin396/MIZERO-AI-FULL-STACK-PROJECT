@@ -18,6 +18,46 @@ export const TRANSLATIONS = {
   hero_tag: { en: 'AI-Powered Lost & Found Platform for Rwanda', rw: 'Urubuga rukoresha AI mu gushakisha ibintu byazimiye mu Rwanda', fr: "Plateforme d'objets perdus et trouvés alimentée par l'IA pour le Rwanda" },
   hero_lost_btn: { en: 'I LOST SOMETHING', rw: 'NATAKAJE IKINTU', fr: "J'AI PERDU QUELQUE CHOSE" },
   hero_found_btn: { en: 'I FOUND SOMETHING', rw: 'NABONYE IKINTU', fr: "J'AI TROUVÉ QUELQUE CHOSE" },
+  hero_pill: { en: 'Together We Bring Things Home', rw: 'Hamwe Dusubiza Ibintu Iwabyo', fr: 'Ensemble, Nous Ramenons Les Choses' },
+  hero_caption: { en: 'Small items. Big stories.', rw: 'Ibintu bito. Inkuru nini.', fr: 'Petits objets. Grandes histoires.' },
+  hero_search_placeholder: { en: 'Search for an item (e.g. phone, backpack, wallet...)', rw: 'Shakisha ikintu (urugero: telefoni, agasagi, ipochi...)', fr: 'Rechercher un objet (ex. téléphone, sac à dos, portefeuille...)' },
+  hero_search_btn: { en: 'Search', rw: 'Shakisha', fr: 'Rechercher' },
+  trust_safe: { en: 'Safe & Secure', rw: 'Umutekano n\'Ibanga', fr: 'Sûr et Sécurisé' },
+  trust_fast: { en: 'Fast Matching', rw: 'Guhuza Vuba', fr: 'Correspondance Rapide' },
+  trust_community: { en: 'Rwanda Community', rw: 'Umuryango w\'u Rwanda', fr: 'Communauté Rwandaise' },
+
+  // Home category grid
+  cat_phones_title: { en: 'Phones & Electronics', rw: 'Telefoni n\'Ibikoresho', fr: 'Téléphones et Électronique' },
+  cat_phones_desc: { en: 'Smartphones, laptops, tablets and more.', rw: 'Telefoni, mudasobwa, itabure n\'ibindi.', fr: 'Smartphones, ordinateurs portables, tablettes et plus.' },
+  cat_wallets_title: { en: 'Wallets & Documents', rw: 'Ipochi n\'Inyandiko', fr: 'Portefeuilles et Documents' },
+  cat_wallets_desc: { en: 'Wallets, IDs, cards, important documents.', rw: 'Ipochi, indangamuntu, ikarita, inyandiko z\'ingenzi.', fr: 'Portefeuilles, cartes d\'identité, cartes, documents importants.' },
+  cat_bags_title: { en: 'Bags & Luggage', rw: 'Amasakoshi n\'Imizigo', fr: 'Sacs et Bagages' },
+  cat_bags_desc: { en: 'Backpacks, handbags, suitcases and more.', rw: 'Amasakoshi, ibisage, imizigo n\'ibindi.', fr: 'Sacs à dos, sacs à main, valises et plus.' },
+  cat_keys_title: { en: 'Keys & Accessories', rw: 'Urufunguzo n\'Ibikoresho', fr: 'Clés et Accessoires' },
+  cat_keys_desc: { en: 'Keys, glasses, watches, headphones and more.', rw: 'Urufunguzo, amaso, amasaha, ikoresho cyo kwumva n\'ibindi.', fr: 'Clés, lunettes, montres, écouteurs et plus.' },
+  cat_clothing_title: { en: 'Clothing & Personal', rw: 'Imyenda n\'Ibyawe', fr: 'Vêtements et Personnel' },
+  cat_clothing_desc: { en: 'Jackets, clothes, shoes and more.', rw: 'Amajaketi, imyenda, inkweto n\'ibindi.', fr: 'Vestes, vêtements, chaussures et plus.' },
+  cat_locations_title: { en: 'Locations in Rwanda', rw: 'Ahantu mu Rwanda', fr: 'Lieux au Rwanda' },
+  cat_locations_desc: { en: 'Kigali, markets, bus stations, schools and more.', rw: 'Kigali, amasoko, sitasiyo za bisi, amashuri n\'ibindi.', fr: 'Kigali, marchés, gares routières, écoles et plus.' },
+  view_items: { en: 'View Items', rw: 'Reba Ibintu', fr: 'Voir les Objets' },
+  view_locations: { en: 'View Locations', rw: 'Reba Ahantu', fr: 'Voir les Lieux' },
+
+  // Home "How it Works" section
+  home_how_label: { en: '— How It Works', rw: '— Uko Bikora', fr: '— Comment Ça Marche' },
+  home_how_title: { en: 'Find. Return. Make a Difference.', rw: 'Shakisha. Garura. Uhindure Ibintu.', fr: 'Trouvez. Rendez. Faites la Différence.' },
+  home_how_desc: { en: "MIZERO makes it simple to report, search, and return lost items across Rwanda. Here's how it works:", rw: 'MIZERO ituma byoroha kwandika, gushakisha, no gusubiza ibintu byatakaye hirya no hino mu Rwanda. Dore uko bikora:', fr: "MIZERO facilite le signalement, la recherche et le retour d'objets perdus à travers le Rwanda. Voici comment ça marche :" },
+  home_how_cta: { en: 'Get Started', rw: 'Tangira', fr: 'Commencer' },
+  home_step1_title: { en: 'Report Lost or Found', rw: 'Andika Icyatakaye cyangwa Icyabonetse', fr: 'Signaler Perdu ou Trouvé' },
+  home_step1_desc: { en: 'Post details and photos of the item.', rw: 'Andika ibisobanuro n\'amafoto y\'ikintu.', fr: 'Publiez les détails et photos de l\'objet.' },
+  home_step2_title: { en: 'Search & Match', rw: 'Shakisha kandi Uhuze', fr: 'Rechercher et Faire Correspondre' },
+  home_step2_desc: { en: 'Use AI to find matches across Rwanda.', rw: 'Koresha AI kugira ngo ubone ibihuye hirya no hino mu Rwanda.', fr: 'Utilisez l\'IA pour trouver des correspondances au Rwanda.' },
+  home_step3_title: { en: 'Get in Touch', rw: 'Vugana', fr: 'Entrer en Contact' },
+  home_step3_desc: { en: 'Contact the owner or finder safely.', rw: 'Vugana na nyirikintu cyangwa uwakibonye mu mutekano.', fr: 'Contactez le propriétaire ou celui qui a trouvé l\'objet en toute sécurité.' },
+  home_step4_title: { en: 'Reunite', rw: 'Isubirane', fr: 'Retrouvailles' },
+  home_step4_desc: { en: 'Get your item back or return it to the owner.', rw: 'Garukana ikintu cyawe cyangwa ukigarurire nyirikintu.', fr: 'Récupérez votre objet ou rendez-le à son propriétaire.' },
+
+  // Nav brand
+  brand_tagline: { en: 'Lost & Found Rwanda', rw: 'Kubura & Kubona - Rwanda', fr: 'Objets Perdus et Trouvés - Rwanda' },
 
   // Feature cards
   feat_ai_title: { en: 'AI Matching', rw: 'Guhuza bikoresheje AI', fr: 'Correspondance IA' },
