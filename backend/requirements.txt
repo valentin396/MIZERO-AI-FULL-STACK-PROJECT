@@ -13,3 +13,4 @@ scikit-learn==1.5.2
 Pillow==10.4.0
 numpy==1.26.4
 openai==3.19.0
+cloudinary==1.46.2
